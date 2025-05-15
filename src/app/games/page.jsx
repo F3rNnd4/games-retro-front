@@ -1,8 +1,9 @@
 "use client";
 
 import styles from "./games.module.css";
-import axios from "axios";
+
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function Games() {
   const url = process.env.NEXT_PUBLIC_API_URL;
@@ -19,10 +20,10 @@ export default function Games() {
       try {
         setLoading(true);
         const response = await axios.get(`${url}/games`);
-        setGames(response.data);
+        setGames(response.data.games);
         setLoading(false);
       } catch (error) {
-        console.error("Erro ao buscar jogos na API");
+        console.error("Erro ao buscar os jogos na API");
         setError(
           "Não foi possível carregar os jogos. Tente novamente mais tarde! #Sorry"
         );
@@ -35,57 +36,91 @@ export default function Games() {
 
   return (
     <div className={styles.container}>
-    <main className={styles.main}>
-      <div className={styles.gamesHeader}>
-        <h1 className={styles.gamesTitle}>Games Retrô 🕹️</h1>
-        <p className={styles.gamesSubtitle}>
-          Explore nossa coleção de games retrô e seus recordes!
-        </p>
-      </div>
+      <main className={styles.main}>
+        <div className={styles.gamesHeader}>
+          <h1 className={styles.gamesTitle}>Games Retrô 🕹️</h1>
+          <p className={styles.gamesSubtitle}>
+            Explore nossa coleção de games retrô e seus recordes!
+          </p>
+        </div>
 
-      <div className={styles.searchContainer}>
-        <form className={styles.searchForm}>
-          <div className={styles.searchFields}>
-            <div className={styles.searchField}>
-              <label htmlFor="name">Nome do Game:</label>
-              <input
-                type="text"
-                id="name"
-                value={searchGames} // Adicionando o valor do estado
-                onChange={(e) => setSearchGames(e.target.value)} // Atualizando o estado
-                placeholder="Buscar pelo nome do game..."
-                className={styles.searchInput}
-              />
+        <div className={styles.searchContainer}>
+          <form className={styles.searchForm}>
+            <div className={styles.searchFields}>
+              <div className={styles.searchField}>
+                <label htmlFor="name">Nome do Game:</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={searchGames}
+                  onChange={(e) => setSearchGames(e.target.value)}
+                  placeholder="Buscar pelo nome do game..."
+                  className={styles.searchInput}
+                />
+              </div>
+
+              <div className={styles.searchField}>
+                <label htmlFor="platform">Plataforma:</label>
+                <input
+                  type="text"
+                  id="platform"
+                  value={searchPlatform}
+                  onChange={(e) => setSearchPlatform(e.target.value)}
+                  placeholder="Ex: PlayStation, PC, Switch..."
+                  className={styles.searchInput}
+                />
+              </div>
             </div>
 
-            <div className={styles.searchField}>
-              <label htmlFor="platform">Plataforma:</label>
-              <input
-                type="text"
-                id="platform"
-                value={searchPlatform}  // Guarda o valor do estado
-                onChange={(e) => setSearchPlatform(e.target.value)} // Atualiza o estado
-                placeholder="Ex: PlayStation, PC, Switch..."
-                className={styles.searchInput}
-              />
+            <div className={styles.searchButtons}>
+              <button type="submit" className={styles.searchButton}>
+                Buscar
+              </button>
+              <button
+                type="button"
+                className={styles.clearButton}
+                //onClick={handleClearSearch}
+              >
+                Limpar
+              </button>
             </div>
-          </div>
+          </form>
+        </div>
 
-          <div className={styles.searchButtons}>
-            <button type="submit" className={styles.searchButton}>
-              Buscar
-            </button>
-            <button
-              type="button"
-              className={styles.clearButton}
-              //onClick={handleClearSearch}
-            >
-              Limpar
-            </button>
-          </div>
-        </form>
-      </div>
-    </main>
-  </div>
+        {/* Lista de Games */}
+        <div className={styles.gameGrid}>
+          {games.length === 0 ? (
+            <div className={styles.noGames}>
+              <p>Nenhum game encontrado.</p>
+            </div>
+          ) : (
+            games.map((game) => (
+              <div key={game.id} className={styles.gameCard}>
+                <div className={styles.gameCardHeader}>
+                  <h3 className={styles.gameTitle}>{game.name}</h3>
+                </div>
+                <div className={styles.gameCardBody}>
+                  <p>
+                    <strong>Plataforma:</strong> {game.platform}
+                  </p>
+                  <p>
+                    <strong>ID:</strong> {game.id.substring(0, 8)}...
+                  </p>
+                  <p>
+                    <strong>Criado em:</strong>{" "}
+                    {new Date(game.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className={styles.gameCardFooter}>
+                  <Link href={`/games/${game.id}`} className={styles.gameLink}>
+                    Ver detalhes
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
